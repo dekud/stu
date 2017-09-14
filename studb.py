@@ -28,11 +28,16 @@ class Student(Base):
     student_info = Column(Text)
 
     def __repr__(self):
-        rstr = "<Student(N='%s', fullname='%s', student_id='%s',birth_date='%s', student_group='%s', department='%s', kafedra='%s')>" %(self.N, self.fullname, self.student_id, self.birth_date, self.student_group, self.department, self.kafedra)
+        rstr = "<Student(N='%s', fullname='%s', student_id='%s',birth_date='%s'," \
+               " student_group='%s', department='%s', kafedra='%s'" \
+               ")>" %(self.N, self.fullname, self.student_id,
+                self.birth_date, self.student_group, self.department, self.kafedra)
         return rstr
+
 
 class Info(Base):
     __tablename__ = 'info'
+
     id = Column(Integer, primary_key=True)
     student_id = Column(Integer, ForeignKey('students.id'))
     okso_bac = Column(String(512))
@@ -49,6 +54,15 @@ class Info(Base):
     current_state = Column(String(128))
     group = Column(String(512))
 
+class Mark(Base):
+    __tablename__ = 'marks'
+    id = Column(Integer, primary_key=True)
+    student_id = Column(Integer, ForeignKey('students.id'))
+    semester = Column(String(128))
+    discipline = Column(String(256))
+    mark_type = Column(String(64))
+    mark_value = Column(String(64))
+
 
 class StudentsDB:
     def __init__(self, db_path):
@@ -58,7 +72,6 @@ class StudentsDB:
         self.session = Session()
 
     def insert(self, st):
-        print(st)
         try:
             self.session.add(st)
             # self.session.commit()
@@ -72,8 +85,18 @@ class StudentsDB:
         except exc.SQLAlchemyError as e:
             print(e)
 
+    def inser_mark(self,mark):
+        try:
+            self.session.add(mark)
+            # self.session.commit()
+        except exc.SQLAlchemyError as e:
+            print(e)
+
     def commit(self):
-        self.session.commit()
+        try:
+            self.session.commit()
+        except exc.SQLAlchemyError as e:
+            print(e)
 
 
 

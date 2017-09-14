@@ -119,8 +119,8 @@ def get_mark(url, cookies):
             ar_task = b.split("\n")
             ar_task[0] = ar_task[0].replace(" class=view colspan = 4 align=left style='background-color:#999999'> ",
                                             "").replace("</th>", "")
-            # print(ar_task)
-            # print(" -- ")
+            print(ar_task)
+            print(" -- ")
             marks.append(ar_task)
 
         start = stop
@@ -188,7 +188,7 @@ def get_page(host, cookies, params, isInfo):
 
 
 if __name__ == "__main__":
-    sdb = studb.StudentsDB('t2.db')
+    sdb = studb.StudentsDB('t1.db')
     host = ls.students_host
     cookies = login(host, ls.login, ls.password)
 
@@ -199,7 +199,7 @@ if __name__ == "__main__":
         if not students:
             break
 
-        for s, inf in zip(students,infos):
+        for s, inf, mark in zip(students,infos,marks):
             st = studb.Student(N = s[1],
                                fullname = s[2],
                                student_id=s[3],
@@ -237,6 +237,20 @@ if __name__ == "__main__":
                 sdb.commit()
             except KeyError:
                 print(inf)
+
+            for sem_mark in mark:
+                for discp in sem_mark[1:]:
+                    print(discp)
+                    ar = discp.split(',')
+                    markt = studb.Mark(
+                        student_id = st.id,
+                        semester = sem_mark[0],
+                        discipline = ar[1],
+                        mark_type = ar[2],
+                        mark_value = ar[3]
+                    )
+                    sdb.inser_mark(markt)
+            sdb.commit()
 
 
         # for s,inf,mark in zip(students, infos, marks):

@@ -1,8 +1,7 @@
 #! /usr/bin/env python3.5
 import requests
-import sqlite3
 import local_settings as ls
-
+import studb
 
 def extract_stud_table(html_page):
     pos = 0
@@ -22,45 +21,45 @@ def extract_stud_table(html_page):
     return html_page[s:end]
 
 
-def login(host,user,password):
-    payload = {'login':user,'pass':password}
+def login(host, user, password):
+    payload = {'login': user, 'pass': password}
     r = requests.post(host + '/login/login_code.php', data=payload)
     r.close()
     return r.cookies
 
 
-def get_info(url,cookies):
+def get_info(url, cookies):
     r = requests.get(url, cookies=cookies)
 
     if r.status_code != 200:
         print(r.status_code)
         return []
     # print(r.text.replace("&nbsp;", ""))
-    htmltext = r.text.replace("&nbsp;", " ").replace("\n","").replace("\t","").replace("\r","")
+    htmltext = r.text.replace("&nbsp;", " ").replace("\n", "").replace("\t", "").replace("\r", "")
     # print(htmltext)
     start = htmltext.find('viewstud_marks_new_code')
-    stop = htmltext.find('>',start)
+    stop = htmltext.find('>', start)
     mark_href = htmltext[start:stop - 1]
     # print(mark_href)
 
-    start = htmltext.find("</tr>",stop)
+    start = htmltext.find("</tr>", stop)
     info = {}
     is0 = True
 
     while start != -1:
-        start = htmltext.find("<tr",start + 1)
+        start = htmltext.find("<tr", start + 1)
         key_str = ""
         val_str = ""
 
         if is0:
-            td0s = htmltext.find("<td",start)
+            td0s = htmltext.find("<td", start)
             td1s = htmltext.find("<td", td0s + 4)
-            s = htmltext.find(">",td1s) + 1
-            e = htmltext.find("<",s)
+            s = htmltext.find(">", td1s) + 1
+            e = htmltext.find("<", s)
             key_str = htmltext[s:e - 1]
             td2s = htmltext.find("<td", td1s + 4)
-            s = htmltext.find(">",td2s) + 1
-            e = htmltext.find("</t",s)
+            s = htmltext.find(">", td2s) + 1
+            e = htmltext.find("</t", s)
             val_str = htmltext[s:e].strip(" ")
             is0 = False
         else:
@@ -68,23 +67,23 @@ def get_info(url,cookies):
             td1s = htmltext.find("<td", start)
             if stop < td1s:
                 continue
-            s = htmltext.find(">",td1s) + 1
-            e = htmltext.find("<",s)
+            s = htmltext.find(">", td1s) + 1
+            e = htmltext.find("<", s)
             key_str = htmltext[s:e - 1]
             td2s = htmltext.find("<td", td1s + 4)
-            s = htmltext.find(">",td2s) + 1
-            e = htmltext.find("</t",s)
+            s = htmltext.find(">", td2s) + 1
+            e = htmltext.find("</t", s)
             val_str = htmltext[s:e].strip(" ")
             pass
 
         if key_str != "":
-            info[key_str.replace(":","")] = val_str.replace("<b>","").replace("</b>","").replace("\"","--")
+            info[key_str.replace(":", "")] = val_str.replace("<b>", "").replace("</b>", "").replace("\"", "--")
 
     return info, mark_href
 
 
 def get_mark(url, cookies):
-   # print(url)
+    # print(url)
     r = requests.get(url, cookies=cookies)
 
     if r.status_code != 200:
@@ -92,7 +91,7 @@ def get_mark(url, cookies):
         return []
 
     # print(r.text.replace("&nbsp;", ""))
-    htmltext = r.text.replace("&nbsp;", " ").replace("\n","").replace("\t","").replace("\r","")
+    htmltext = r.text.replace("&nbsp;", " ").replace("\n", "").replace("\t", "").replace("\r", "")
     start = 0
     marks = []
     # print("             ")
@@ -111,11 +110,15 @@ def get_mark(url, cookies):
         ar = text.split("<th")
 
         for a in ar[5:]:
-            b = a.replace("<tr","\n<tr").replace("<tr><td class = view>","").replace("<td class = view>",",").replace("</td>","").replace("</tr>","")
-            b = b.replace("</table>","").replace("\n<tr>","").replace("\"","--")
+            b = a.replace("<tr", "\n<tr").replace("<tr><td class = view>", "").replace("<td class = view>",
+                                                                                       ",").replace("</td>",
+                                                                                                    "").replace("</tr>",
+                                                                                                                "")
+            b = b.replace("</table>", "").replace("\n<tr>", "").replace("\"", "--")
             # print(b)
             ar_task = b.split("\n")
-            ar_task[0] = ar_task[0].replace(" class=view colspan = 4 align=left style='background-color:#999999'> ","").replace("</th>","")
+            ar_task[0] = ar_task[0].replace(" class=view colspan = 4 align=left style='background-color:#999999'> ",
+                                            "").replace("</th>", "")
             # print(ar_task)
             # print(" -- ")
             marks.append(ar_task)
@@ -125,11 +128,11 @@ def get_mark(url, cookies):
     return marks
 
 
-def get_page(host,cookies,params,isInfo):
+def get_page(host, cookies, params, isInfo):
     url = host + '/show_students/show_all_st_code.php'
     r = requests.get(url, cookies=cookies, params=params)
     ststr = extract_stud_table(r.text)
-   # print(ststr)
+    # print(ststr)
     r.close()
     tr_pos = 0
     pos = ststr.find("<th", 0)
@@ -184,64 +187,57 @@ def get_page(host,cookies,params,isInfo):
     return student_table, info_table, mark_table
 
 
-def open_db(db_path):
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-
-    cursor.execute('''CREATE TABLE IF NOT EXISTS students (
-                id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
-                N INTEGER UNIQUE,
-                fullname TEXT,
-                student_id TEXT,
-                birth_date TEXT,
-                student_group TEXT,
-                faculty TEXT,
-                department TEXT,
-                decanat TEXT,
-                form TEXT,
-                O TEXT,
-                code TEXT,
-                commerce TEXT,
-                current_state TEXT,
-                state_description TEXT
-                  );''')
-
-    return conn, cursor
-
-
-def save_student_to_db(cursor, s, inf, mark):
-    if inf:
-        inf['marks'] = mark
-
-    sqlstr = '''INSERT INTO students (N,fullname,student_id,birth_date,student_group,faculty,department,decanat,
-            form,O,code,commerce,current_state,state_description) 
-              VALUES ( {0}, "{1}", "{2}", "{3}", "{4}", "{5}", "{6}", "{7}", "{8}", "{9}", "{10}", "{11}", "{12}", "{13}");'''.format(
-        s[1],s[2],s[3],s[4],s[5],s[6],s[7],s[8],s[9],s[10],s[11],s[12],s[13],str(inf))
-
-    try:
-        cursor.execute(sqlstr)
-    except sqlite3.Error as e:
-        print(sqlstr)
-        print(e)
-
-
 if __name__ == "__main__":
-    # conn, cursor = open_db('test.db')
-
+    sdb = studb.StudentsDB('t2.db')
     host = ls.students_host
-    cookies = login(host,ls.login,ls.password)
+    cookies = login(host, ls.login, ls.password)
 
-    for ind in range(2,3):
-        print(ind)
-        students, infos, marks = get_page(host,cookies,{'page': str(ind), 'dep':'34'},False)
-        for s in students:
-            print(s)
-        if students == []:
+    for ind in range(1, 2):
+
+        students, infos, marks = get_page(host, cookies, {'page': str(ind), 'dep': '34'}, True)
+
+        if not students:
             break
+
+        for s, inf in zip(students,infos):
+            st = studb.Student(N = s[1],
+                               fullname = s[2],
+                               student_id=s[3],
+                               birth_date =s[4],
+                               student_group =s[5],
+                               department =s[6],
+                               kafedra =s[7],
+                               decanat =s[8],
+                               ed_form =s[9],
+                               ed_type =s[10],
+                               code =s[11],
+                               commerce =s[12],
+                               current_state =s[13],
+                               student_info ='info'
+                               )
+            sdb.insert(st)
+            sdb.commit()
+            try:
+                inft = studb.Info(commerce = inf['Б/К'],
+                              doc = inf['Документ'],
+                              phone = inf['Телефон'],
+                              programm = inf['Программа'],
+                              citizenship = inf['Гражданство'],
+                              sex = inf['Пол'],
+                              markbook = inf['Зачетная книжка'],
+                              address = inf['Адрес'],
+                              current_state = inf['Состояние'],
+                              student_id = st.id,
+                              post_index = inf['Индекс'],
+                              group = inf['Группа'],
+                              okso_bac = inf.get('ОКСО Бакалавр'),
+                              okso_mag = inf.get('ОКСО Магистр')
+                              )
+                sdb.inser_info(inft)
+                sdb.commit()
+            except KeyError:
+                print(inf)
+
 
         # for s,inf,mark in zip(students, infos, marks):
         #      save_student_to_db(cursor, s, inf, mark)
-
-    # conn.commit()
-    # conn.close()
-

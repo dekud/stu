@@ -119,8 +119,7 @@ def get_mark(url, cookies):
             ar_task = b.split("\n")
             ar_task[0] = ar_task[0].replace(" class=view colspan = 4 align=left style='background-color:#999999'> ",
                                             "").replace("</th>", "")
-            print(ar_task)
-            print(" -- ")
+            # print(ar_task)
             marks.append(ar_task)
 
         start = stop
@@ -188,14 +187,14 @@ def get_page(host, cookies, params, isInfo):
 
 
 if __name__ == "__main__":
-    sdb = studb.StudentsDB('t1.db')
+    sdb = studb.StudentsDB('stud_base.db')
     host = ls.students_host
     cookies = login(host, ls.login, ls.password)
 
-    for ind in range(1, 2):
+    for ind in range(1, 200):
 
         students, infos, marks = get_page(host, cookies, {'page': str(ind), 'dep': '34'}, True)
-
+        print(ind)
         if not students:
             break
 
@@ -240,7 +239,6 @@ if __name__ == "__main__":
 
             for sem_mark in mark:
                 for discp in sem_mark[1:]:
-                    print(discp)
                     ar = discp.split(',')
                     markt = studb.Mark(
                         student_id = st.id,

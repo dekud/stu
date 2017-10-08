@@ -98,8 +98,14 @@ class StudentsDB:
         except exc.SQLAlchemyError as e:
             print(e)
 
-
-
+    def select_students(self, group = None):
+        try:
+            if(group):
+                return self.session.query(Student).filter(Student.student_group.like('%'+group+'%'))
+            else:
+                return self.session.query(Student)
+        except exc.SQLAlchemyError as e:
+            print(e)
 
 
 

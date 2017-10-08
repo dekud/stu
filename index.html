@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<style>
+    html {
+          font-family: sans-serif;
+          -webkit-text-size-adjust: 100%;
+              -ms-text-size-adjust: 100%;
+        }
+    table {
+            border-style: solid;
+            padding: 15px;
+            border-collapse: collapse;
+       }
+    table {
+      width: 80%;
+      max-width: 80%;
+      margin-bottom: 20px;
+    }
+</style>
+<body>
+<h1>Студенты</h1>
+<form method="get">
+    <p><b>Группа</b></p>
+    {% if group %}
+        <input type="text" size="40" name = 'group' value="{{ group }}">
+    {% else %}
+        <input type="text" size="40" name = 'group' value="">
+    {% end %}
+    <p><input type="submit"></p>
+</form>
+<p>
+    <a href="/getfile" download="">download xlsx</a>
+</p>
+<table border="2">
+    <tr><th>Студент</th><th>Группа</th><th>ID</th></tr>
+    {% for student in students %}
+        {% block student %}
+        <tr>
+            <td>{{ student.name }}</td>
+            <td>{{ student.group }}</td>
+            <td>{{ student.id }}</td>
+        </tr>
+        {% end %}
+    {% end %}
+</table>
+</body>
+</html>

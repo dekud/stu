@@ -7,61 +7,70 @@ from sqlalchemy import ForeignKey
 
 Base = declarative_base()
 
+# student['fullname'] = tds[2].get_text()
+# student['student_id'] = tds[3].get_text()
+# student['birth_date'] = tds[4].get_text()
+# student['course'] = tds[5].get_text()
+# student['group'] = tds[6].get_text()
+# student['institute'] = tds[7].get_text()
+# student['high_school'] = tds[8].get_text()
+# student['education_form'] = tds[10].get_text()
+# student['education_type'] = tds[11].get_text()
+# student['code'] = tds[12].get_text()
+# student['commerce'] = 1 if tds[13].img else 0
+# student['current_state'] = tds[14].get_text()
 
 class Student(Base):
     __tablename__ = 'students'
 
     id = Column(Integer, primary_key=True)
-    N = Column(Integer, unique=True)
     fullname = Column(String(128))
     student_id = Column(String(32))
     birth_date = Column(String(64))
+    course = Column(String(64))
     student_group = Column(String(32))
-    department = Column(String(32))
-    kafedra = Column(String(32))
-    decanat = Column(String(32))
-    ed_form = Column(String(32))
-    ed_type = Column(String(32))
+    institute = Column(String(32))
+    high_school = Column(String(32))
+    education_form = Column(String(32))
+    education_type = Column(String(32))
     code = Column(String(32))
     commerce = Column(String(32))
     current_state = Column(String(128))
-    student_info = Column(Text)
 
     def __repr__(self):
-        rstr = "<Student(N='%s', fullname='%s', student_id='%s',birth_date='%s'," \
-               " student_group='%s', department='%s', kafedra='%s'" \
-               ")>" %(self.N, self.fullname, self.student_id,
-                self.birth_date, self.student_group, self.department, self.kafedra)
+        rstr = "<Student(fullname='%s', student_id='%s',birth_date='%s'," \
+               " student_group='%s', institute='%s', high_school='%s'" \
+               ")>" %(self.fullname, self.student_id,
+                self.birth_date, self.student_group, self.institute, self.high_school)
         return rstr
-
 
 class Info(Base):
     __tablename__ = 'info'
 
     id = Column(Integer, primary_key=True)
-    student_id = Column(Integer, ForeignKey('students.id'))
+    sid = Column(Integer, ForeignKey('students.id'))
+    document = Column(String(128))
+    sex = Column(String(128))
+    citizenship = Column(String(128))
+    post_index = Column(String(32))
+    address = Column(String(512))
+    phone = Column(String(128))
+    high_school_desc = Column(String(256))
     okso_bac = Column(String(512))
     okso_mag = Column(String(512))
-    commerce = Column(String(32))
-    doc = Column(String(128))
-    phone = Column(String(128))
-    programm = Column(String(128))
-    citizenship = Column(String(128))
-    sex = Column(String(128))
-    markbook = Column(String(128))
-    address = Column(String(512))
-    post_index = Column(String(32))
-    current_state = Column(String(128))
-    group = Column(String(512))
+    student_residence = Column(String(32))
+    celevoy = Column(String(32))
+
 
 class Mark(Base):
     __tablename__ = 'marks'
     id = Column(Integer, primary_key=True)
-    student_id = Column(Integer, ForeignKey('students.id'))
+    sid = Column(Integer, ForeignKey('students.id'))
     semester = Column(String(128))
     discipline = Column(String(256))
-    mark_type = Column(String(64))
-    mark_value = Column(String(64))
+    session = Column(String(128))
+    form = Column(String(64))
+    result = Column(String(64))
 
 
 class StudentsDB:

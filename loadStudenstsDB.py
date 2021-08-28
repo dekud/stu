@@ -191,64 +191,74 @@ if __name__ == "__main__":
     host = ls.students_host
     cookies = login(host, ls.login, ls.password)
 
-    for ind in range(1, 200):
+    for ind in range(1, 10):
 
-        students, infos, marks = get_page(host, cookies, {'page': str(ind), 'dep': '34'}, True)
+        students, infos, marks = get_page(host, cookies, {'page': str(ind), 'dep': '56'}, True)
         print(ind)
         if not students:
             break
 
         for s, inf, mark in zip(students,infos,marks):
-            st = studb.Student(N = s[1],
-                               fullname = s[2],
-                               student_id=s[3],
-                               birth_date =s[4],
-                               student_group =s[5],
-                               department =s[6],
-                               kafedra =s[7],
-                               decanat =s[8],
-                               ed_form =s[9],
-                               ed_type =s[10],
-                               code =s[11],
-                               commerce =s[12],
-                               current_state =s[13],
-                               student_info ='info'
-                               )
-            sdb.insert(st)
-            sdb.commit()
-            try:
-                inft = studb.Info(commerce = inf['Б/К'],
-                              doc = inf['Документ'],
-                              phone = inf['Телефон'],
-                              programm = inf['Программа'],
-                              citizenship = inf['Гражданство'],
-                              sex = inf['Пол'],
-                              markbook = inf['Зачетная книжка'],
-                              address = inf['Адрес'],
-                              current_state = inf['Состояние'],
-                              student_id = st.id,
-                              post_index = inf['Индекс'],
-                              group = inf['Группа'],
-                              okso_bac = inf.get('ОКСО Бакалавр'),
-                              okso_mag = inf.get('ОКСО Магистр')
-                              )
-                sdb.inser_info(inft)
-                sdb.commit()
-            except KeyError:
-                print(inf)
+            # st = studb.Student(N = s[1],
+            #                    fullname = s[2],
+            #                    student_id=s[3],
+            #                    birth_date =s[4],
+            #                    student_group =s[5],
+            #                    department =s[6],
+            #                    kafedra =s[7],
+            #                    decanat =s[8],
+            #                    ed_form =s[9],
+            #                    ed_type =s[10],
+            #                    code =s[11],
+            #                    commerce =s[12],
+            #                    current_state =s[13],
+            #                    student_info ='info'
+            #                    )
+            # sdb.insert(st)
+            # sdb.commit()
+            print("Students:")
+            print(s)
+            print("---------------------------------")
+            print("Info:")
+            print(inf)
+            print("---------------------------------")
+            print("Marks:")
+            print(marks)
+            print("---------------------------------")
+            print("---------------------------------")
+            # try:
+            #     inft = studb.Info(commerce = inf.get('Б/К'),
+            #                   doc = inf.get('Документ'),
+            #                   phone = inf.get('Телефон'),
+            #                   programm = inf.get('Программа'),
+            #                   citizenship = inf.get('Гражданство'),
+            #                   sex = inf.get('Пол'),
+            #                   markbook = inf.get('Зачетная книжка'),
+            #                   address = inf.get('Адрес'),
+            #                   current_state = inf.get('Состояние'),
+            #                   student_id = st.id,
+            #                   post_index = inf.get('Индекс'),
+            #                   group = inf.get('Группа'),
+            #                   okso_bac = inf.get('ОКСО Бакалавр'),
+            #                   okso_mag = inf.get('ОКСО Магистр')
+            #                   )
+            #     sdb.inser_info(inft)
+            #     sdb.commit()
+            # except KeyError:
+            #     print(inf)
 
-            for sem_mark in mark:
-                for discp in sem_mark[1:]:
-                    ar = discp.split(',')
-                    markt = studb.Mark(
-                        student_id = st.id,
-                        semester = sem_mark[0],
-                        discipline = ar[1],
-                        mark_type = ar[2],
-                        mark_value = ar[3]
-                    )
-                    sdb.inser_mark(markt)
-            sdb.commit()
+            # for sem_mark in mark:
+            #     for discp in sem_mark[1:]:
+            #         ar = discp.split(',')
+            #         markt = studb.Mark(
+            #             student_id = st.id,
+            #             semester = sem_mark[0],
+            #             discipline = ar[1],
+            #             mark_type = ar[2],
+            #             mark_value = ar[3]
+            #         )
+            #         sdb.inser_mark(markt)
+            # sdb.commit()
 
 
         # for s,inf,mark in zip(students, infos, marks):

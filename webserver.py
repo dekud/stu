@@ -15,15 +15,15 @@ class Stud:
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        sdb = studb.StudentsDB('stud_base.db')
+        sdb = studb.StudentsDB('StudentBase.db')
         students = []
         group = ''
         try:
             group = self.get_argument("group")
-            studs = sdb.select_students(group=group)
+            studs = sdb.select_students(group = group)
             print(1)
         except:
-            studs = sdb.select_students(group='134')
+            studs = sdb.select_students(group = '134')
             print(2)
 
         studtata = {}
@@ -37,7 +37,7 @@ class MainHandler(tornado.web.RequestHandler):
             student = Stud()
             student.name = s.fullname
             student.id = s.student_id
-            student.N = s.N
+            student.N = s.id
             student.group = s.student_group
             students.append(student)
             studtata['Name'].append(s.fullname)
